@@ -1,0 +1,50 @@
+# Example egress policy configuration
+# This file defines which API keys can access which destinations
+#
+# IMPORTANT: Replace all api_keys values with your own secret strings before deploying.
+# These are placeholder values for illustration purposes only.
+
+identities:
+  # Frontend services
+  "frontend-services":
+    api_keys:
+      - "frontend-pod-1"
+      - "frontend-pod-2"
+    allowed_destinations:
+      - "api.example.com"
+      - "*.cdn.example.com"
+      - "fonts.googleapis.com"
+
+  # Backend services
+  "backend-services":
+    api_keys:
+      - "backend-worker-1"
+      - "backend-worker-2"
+      - "backend-queue-processor"
+    allowed_destinations:
+      - "*.googleapis.com"
+      - "*.amazonaws.com"
+      - "db.internal.svc.cluster.local"
+      - "10.0.0.0/24"
+      - "docker.io"
+      - "1.1.1.1"
+
+  # Monitoring services
+  "monitoring-services":
+    api_keys:
+      - "prometheus"
+      - "alertmanager"
+    allowed_destinations:
+      - "prometheus.internal"
+      - "*.datadog.com"
+      - "*.newrelic.com"
+
+  # Worker services
+  "worker-services":
+    api_keys:
+      - "worker-1"
+      - "worker-2"
+    allowed_destinations:
+      - "queue.internal.svc.cluster.local"
+      - "storage.example.com"
+      - "192.168.1.100"
