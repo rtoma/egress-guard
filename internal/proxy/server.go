@@ -9,9 +9,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/rtoma/k8s-egress-guard/internal/config"
-	"github.com/rtoma/k8s-egress-guard/internal/logging"
-	"github.com/rtoma/k8s-egress-guard/internal/metrics"
+	"github.com/rtoma/egress-guard/internal/config"
+	"github.com/rtoma/egress-guard/internal/logging"
+	"github.com/rtoma/egress-guard/internal/metrics"
 )
 
 const (

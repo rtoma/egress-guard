@@ -3,7 +3,7 @@ package proxy
 import (
 	"io"
 
-	"github.com/rtoma/k8s-egress-guard/internal/metrics"
+	"github.com/rtoma/egress-guard/internal/metrics"
 )
 
 const (

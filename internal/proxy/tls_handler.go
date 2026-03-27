@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rtoma/k8s-egress-guard/internal/metrics"
+	"github.com/rtoma/egress-guard/internal/metrics"
 )
 
 // isIPAddress checks if the given host is an IP address (v4 or v6)

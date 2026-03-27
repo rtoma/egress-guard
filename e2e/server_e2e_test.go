@@ -17,9 +17,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rtoma/k8s-egress-guard/internal/config"
-	"github.com/rtoma/k8s-egress-guard/internal/logging"
-	"github.com/rtoma/k8s-egress-guard/internal/proxy"
+	"github.com/rtoma/egress-guard/internal/config"
+	"github.com/rtoma/egress-guard/internal/logging"
+	"github.com/rtoma/egress-guard/internal/proxy"
 )
 
 // createTestConfig creates a temporary config file for testing

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/rtoma/k8s-egress-guard/internal/metrics"
+	"github.com/rtoma/egress-guard/internal/metrics"
 )
 
 // extractAPIKey extracts and validates the API key from Proxy-Authorization header

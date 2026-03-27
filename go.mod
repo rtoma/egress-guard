@@ -1,4 +1,4 @@
-module github.com/rtoma/k8s-egress-guard
+module github.com/rtoma/egress-guard
 
 go 1.25.5
 
