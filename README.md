@@ -1,10 +1,10 @@
-# k8s-egress-guard
+# egress-guard
 
 A Kubernetes egress proxy that controls outbound traffic from pods to approved destinations based on pod identity.
 
 ## Overview
 
-k8s-egress-guard is an HTTP CONNECT proxy written in Go that enforces egress policies for Kubernetes workloads. It authenticates pods via `Proxy-Authorization` headers and validates both the requested destination and SNI hostname during TLS handshakes to prevent DNS rebinding attacks.
+egress-guard is an HTTP CONNECT proxy written in Go that enforces egress policies for Kubernetes workloads. It authenticates pods via `Proxy-Authorization` headers and validates both the requested destination and SNI hostname during TLS handshakes to prevent DNS rebinding attacks.
 
 ## Features
 
@@ -242,7 +242,7 @@ go test -v ./...
 ## Project Structure
 
 ```
-k8s-egress-guard/
+egress-guard/
 ├── cmd/
 │   └── main.go                 # Application entry point
 ├── internal/
