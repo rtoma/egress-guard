@@ -3,15 +3,21 @@ package e2e_test
 import (
 	"bufio"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/base64"
+	"encoding/pem"
 	"fmt"
 	"io"
+	"math/big"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -95,24 +101,54 @@ func startMockDestinationServer(t *testing.T) (string, func()) {
 	return addr, cleanup
 }
 
+// generateTestCert creates a self-signed TLS certificate for testing
+func generateTestCert(t *testing.T) tls.Certificate {
+	t.Helper()
+
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatalf("failed to generate private key: %v", err)
+	}
+
+	template := &x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			CommonName: "e2e-test-server",
+		},
+		DNSNames:    []string{"localhost"},
+		IPAddresses: []net.IP{net.ParseIP("127.0.0.1")},
+		NotBefore:   time.Now().Add(-time.Minute),
+		NotAfter:    time.Now().Add(24 * time.Hour),
+		KeyUsage:    x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+	}
+
+	certDER, err := x509.CreateCertificate(rand.Reader, template, template, &privateKey.PublicKey, privateKey)
+	if err != nil {
+		t.Fatalf("failed to create certificate: %v", err)
+	}
+
+	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
+
+	privateKeyDER, err := x509.MarshalECPrivateKey(privateKey)
+	if err != nil {
+		t.Fatalf("failed to marshal private key: %v", err)
+	}
+	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: privateKeyDER})
+
+	cert, err := tls.X509KeyPair(certPEM, keyPEM)
+	if err != nil {
+		t.Fatalf("failed to create TLS key pair: %v", err)
+	}
+
+	return cert
+}
+
 // startMockHTTPSServer creates a TLS server that logs the SNI hostname received
 func startMockHTTPSServer(t *testing.T) (string, func(), <-chan string) {
 	t.Helper()
 
-	// Load certificates from the e2e directory
-	_, file, _, ok := runtime.Caller(0)
-	if !ok {
-		t.Fatal("failed to get test file path")
-	}
-	testDir := filepath.Dir(file)
-
-	certFile := filepath.Join(testDir, "server.crt")
-	keyFile := filepath.Join(testDir, "server.key")
-
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		t.Fatalf("failed to load certificates: %v (cert: %s, key: %s)", err, certFile, keyFile)
-	}
+	cert := generateTestCert(t)
 
 	// Create TLS config that captures SNI
 	sniChan := make(chan string, 10) // buffered to avoid goroutine blocking
@@ -233,10 +269,7 @@ func TestE2EProxyServer(t *testing.T) {
 		serverErrCh <- proxyServer.Start()
 	}()
 
-	// Wait a bit for server to start
-	time.Sleep(100 * time.Millisecond)
-
-	// Get actual proxy address
+	// Get actual proxy address (blocks until server listener is ready)
 	proxyAddr := proxyServer.Listener().Addr().String()
 	t.Logf("Proxy server started on %s", proxyAddr)
 
