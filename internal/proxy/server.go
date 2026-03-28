@@ -55,20 +55,22 @@ func (vr *ValidatedRequest) LogFields(pairs ...any) map[string]any {
 
 // Server is the HTTP CONNECT proxy server
 type Server struct {
-	config      *config.Provider
-	logger      *logging.Logger
-	listener    net.Listener
-	port        string
-	httpServer  *http.Server
-	activeConns int32 // atomic counter for active connections
+	config        *config.Provider
+	logger        *logging.Logger
+	listener      net.Listener
+	listenerReady chan struct{} // closed when listener is set and ready
+	port          string
+	httpServer    *http.Server
+	activeConns   int32 // atomic counter for active connections
 }
 
 // NewServer creates a new proxy server
 func NewServer(cfg *config.Provider, logger *logging.Logger, port string) *Server {
 	return &Server{
-		config: cfg,
-		logger: logger,
-		port:   port,
+		config:        cfg,
+		logger:        logger,
+		port:          port,
+		listenerReady: make(chan struct{}),
 	}
 }
 
@@ -85,6 +87,7 @@ func (s *Server) Start() error {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
 	s.listener = listener
+	close(s.listenerReady) // signal that listener is ready
 
 	// Create HTTP server with our CONNECT handler
 	server := &http.Server{
@@ -159,8 +162,10 @@ func (s *Server) Stop(ctx context.Context) error {
 	return nil
 }
 
-// Listener returns the underlying network listener (for testing)
+// Listener returns the underlying network listener (for testing).
+// It blocks until the server has started and the listener is ready.
 func (s *Server) Listener() net.Listener {
+	<-s.listenerReady
 	return s.listener
 }
 
