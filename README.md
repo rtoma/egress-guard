@@ -1,5 +1,8 @@
 # egress-guard
 
+[![CI](https://github.com/rtoma/egress-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/rtoma/egress-guard/actions/workflows/ci.yml)
+[![Docker](https://github.com/rtoma/egress-guard/actions/workflows/docker.yml/badge.svg)](https://github.com/rtoma/egress-guard/actions/workflows/docker.yml)
+
 A Kubernetes egress proxy that controls outbound traffic from pods to approved destinations based on pod identity.
 
 ## Overview
